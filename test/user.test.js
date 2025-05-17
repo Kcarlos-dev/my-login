@@ -21,6 +21,16 @@ describe("Cadastro de usuario", () => {
             })
 
     })
+    test("Deve impedir que um usuario se cadastre como os daddos vazios",()=>{
+        let user = { name: "", email: "", password: "" }
 
+        return request.post("/user")
+            .send(user)
+            .then(res => {
+                expect(res.statusCode).toEqual(400)
+            }).catch(err => {
+                throw err
+            })
+    })
 
 })

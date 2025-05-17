@@ -23,6 +23,13 @@ app.get("/", (req, res) => {
 })
 
 app.post("/user", async(req,res)=>{
+
+    const {name, email, password} = req.body
+    
+    if(name.trim().length <= 0 || email.trim().length <= 0  || password.trim().length <= 0 ){
+        return res.sendStatus(400)
+    }
+
     try {
         const newUser = new User({name: req.body.name, email: req.body.email, password: req.body.password})
         await newUser.save()
