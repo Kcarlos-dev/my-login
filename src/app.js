@@ -16,58 +16,73 @@ mongoose.connect("mongodb://172.17.0.2:27017/guiapics").then(() => {
     console.log(err)
 })
 
-let User = mongoose.model("User",user)
+let User = mongoose.model("User", user)
 
 app.get("/", (req, res) => {
     res.json({})
 })
 
-app.post("/user", async(req,res)=>{
+app.post("/user", async (req, res) => {
 
-    const {name, email, password} = req.body
-    
-    if(name.trim().length <= 0 || email.trim().length <= 0  || password.trim().length <= 0 ){
+    const { name, email, password } = req.body
+
+    if (name.trim().length <= 0 || email.trim().length <= 0 || password.trim().length <= 0) {
         return res.sendStatus(400)
     }
 
     try {
-        const user = await User.findOne({"email":email})
-        
-        if(user != undefined){
-            res.statusCode =  400
-            return res.json({error: "E-mail já cadastrado"})
+        const user = await User.findOne({ "email": email })
+
+        if (user != undefined) {
+            res.statusCode = 400
+            return res.json({ error: "E-mail já cadastrado" })
         }
 
         const salt = await bcrypt.genSalt(10)
-        const hash = await bcrypt.hash(password,salt)
+        const hash = await bcrypt.hash(password, salt)
 
-        const newUser = new User({name: req.body.name, email: req.body.email, password: hash})
+        const newUser = new User({ name: req.body.name, email: req.body.email, password: hash })
         await newUser.save()
-        res.json({email:req.body.email})
-        
+        res.json({ email: req.body.email })
+
     } catch (error) {
         res.sendStatus(500)
     }
 })
 
-app.post("/auth",async (req,res)=>{
-    const {email, password} = req.body
-    if(email.trim().length <= 0  || password.trim().length <= 0 ){
+app.post("/auth", async (req, res) => {
+    const { email, password } = req.body
+
+    if (email.trim().length <= 0 || password.trim().length <= 0) {
         return res.sendStatus(400)
     }
+    const user = await User.findOne({ "email": email })
 
-    jwt.sign({email},JWTSecret,{expiresIn:"1h"}, (err,token)=>{
-        if(err){
+    if (user == undefined) {
+        res.statusCode = 403
+        res.json({ errors: { email: "E-mail não cadastrado" } })
+        return
+    }
+    const isPassword = await bcrypt.compare(password,user.password)
+    if(!isPassword){
+         res.statusCode = 403
+         res.json({errors:{password: "senha incorreta"}})
+         return
+    }
+
+
+    jwt.sign({ email,name:user.name, id:user._id }, JWTSecret, { expiresIn: "1h" }, (err, token) => {
+        if (err) {
             res.sendStatus(500)
             console.log(err)
             return
         }
-        res.json({token: token})
+        res.json({ token: token })
     })
 })
 
-app.delete("/user/:email", async(req,res)=>{
-    await User.deleteOne({"email":req.params.email})
+app.delete("/user/:email", async (req, res) => {
+    await User.deleteOne({ "email": req.params.email })
     return res.sendStatus(200)
 })
 
