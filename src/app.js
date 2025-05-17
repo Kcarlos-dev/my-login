@@ -2,6 +2,7 @@ const express = require("express")
 const app = express()
 const mongoose = require("mongoose")
 const user = require("./models/User")
+const bcrypt = require("bcrypt")
 
 
 app.use(express.urlencoded({ extended: false }))
@@ -35,7 +36,10 @@ app.post("/user", async(req,res)=>{
             return res.json({error: "E-mail já cadastrado"})
         }
 
-        const newUser = new User({name: req.body.name, email: req.body.email, password: req.body.password})
+        const salt = await bcrypt.genSalt(10)
+        const hash = await bcrypt.hash(password,salt)
+
+        const newUser = new User({name: req.body.name, email: req.body.email, password: hash})
         await newUser.save()
         res.json({email:req.body.email})
         

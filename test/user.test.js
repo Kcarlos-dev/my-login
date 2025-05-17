@@ -1,5 +1,6 @@
 const app = require("../src/app")
 const supertest = require("supertest")
+const mongoose = require("mongoose")
 const request = supertest(app)
 
 describe("Cadastro de usuario", () => {
@@ -63,3 +64,7 @@ describe("Cadastro de usuario", () => {
     })
 
 })
+
+/*afterAll(async () => {
+    await mongoose.connection.close();
+  });*/
