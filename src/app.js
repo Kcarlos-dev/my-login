@@ -47,5 +47,9 @@ app.post("/user", async(req,res)=>{
         res.sendStatus(500)
     }
 })
+app.delete("/user/:email", async(req,res)=>{
+    await User.deleteOne({"email":req.params.email})
+    return res.sendStatus(200)
+})
 
 module.exports = app

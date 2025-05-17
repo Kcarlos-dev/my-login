@@ -3,6 +3,26 @@ const supertest = require("supertest")
 const mongoose = require("mongoose")
 const request = supertest(app)
 
+const mainUser = { name: "adm", email: "adm@email.com", password: "123456" }
+
+beforeAll(() => {
+    //Inserir usuario adm no banco
+    return request.post("/user")
+        .send(mainUser)
+        .then(res => { })
+        .catch(err => { console.log(err) })
+
+})
+
+afterAll(async () => {
+    //remove o usuario adm do banco
+    return request.delete(`/user/${mainUser.email}`)
+        .then(res => { })
+        .catch(err => { console.log(err) })
+
+})
+
+
 describe("Cadastro de usuario", () => {
     test("Deve cadastrar um usuario com sucesso", () => {
 
@@ -64,7 +84,3 @@ describe("Cadastro de usuario", () => {
     })
 
 })
-
-/*afterAll(async () => {
-    await mongoose.connection.close();
-  });*/
