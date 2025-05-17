@@ -21,7 +21,7 @@ describe("Cadastro de usuario", () => {
             })
 
     })
-    test("Deve impedir que um usuario se cadastre como os daddos vazios",()=>{
+    test("Deve impedir que um usuario se cadastre como os daddos vazios", () => {
         let user = { name: "", email: "", password: "" }
 
         return request.post("/user")
@@ -31,6 +31,35 @@ describe("Cadastro de usuario", () => {
             }).catch(err => {
                 throw err
             })
+    })
+    test("Deve impedir que um usuario se cadastre com um e-mail repetido", () => {
+
+        const time = Date.now()
+        let email = `${time}@email.com`
+        let user = { name: "Carlos", email: email, password: "123456" }
+
+        return request.post("/user")
+            .send(user)
+            .then(res => {
+
+                expect(res.statusCode).toEqual(200)
+                expect(res.body.email).toEqual(email)
+
+                return request.post("/user")
+                    .send(user)
+                    .then(res => {
+                        expect(res.statusCode).toEqual(400)
+                        expect(res.body.error).toEqual("E-mail já cadastrado")
+                    })
+                    .catch(err => {
+                        throw err
+                    })
+
+            }).catch(err => {
+                throw err
+            })
+
+
     })
 
 })

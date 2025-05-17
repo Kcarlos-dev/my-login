@@ -1,5 +1,6 @@
 const app = require("../src/app")
 const supertest = require("supertest")
+const mongoose = require("mongoose")
 const request = supertest(app)
 
 test("A aplicação deve responder na porta 3131", () => {
@@ -12,3 +13,7 @@ test("A aplicação deve responder na porta 3131", () => {
     })
 
 })
+
+afterAll(async () => {
+  await mongoose.connection.close();
+});
